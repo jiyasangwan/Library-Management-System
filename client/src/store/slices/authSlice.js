@@ -21,7 +21,7 @@ const authSlice=createSlice({
             state.message=action.payload.message;
 
         },
-        registerFailed(state){
+        registerFailed(state,action){
             state.loading=false;
             state.error=action.payload;
         },
@@ -37,7 +37,7 @@ const authSlice=createSlice({
             state.user=action.payload.user;
 
         },
-        otpVerificationFailed(state){
+        otpVerificationFailed(state,action){
             state.loading=false;
             state.error=action.payload;
         },
@@ -53,7 +53,7 @@ const authSlice=createSlice({
             state.user=action.payload.user;
 
         },
-        loginFailed(state){
+        loginFailed(state,action){
             state.loading=false;
             state.error=action.payload;
         },
@@ -116,7 +116,7 @@ const authSlice=createSlice({
             state.loading=false;
             state.message=action.payload;
         },
-        forgotPasswordFailed(state){
+        forgotPasswordFailed(state,action){
             state.loading=false;
             state.error=action.payload;
         },
@@ -134,7 +134,7 @@ const authSlice=createSlice({
             state.user=action.payload.user;
             state.isAuthenticated=true;
         },
-        resetPasswordFailed(state){
+        resetPasswordFailed(state,action){
             state.loading=false;
             state.error=action.payload;
         },
