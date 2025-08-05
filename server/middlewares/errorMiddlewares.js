@@ -10,7 +10,13 @@ export const errorMiddleware=(err,req,res,next)=>{
     err.message=err.message || "Internal Server Error";
     err.statusCode=err.statusCode ||500;
 
-    console.log(err);
+    console.log("❌ Server Error:", {
+        message: err.message,
+        statusCode: err.statusCode,
+        stack: err.stack,
+        name: err.name,
+        code: err.code
+    });
 
     if(err.code === 11000){
         const statusCode=400;

@@ -13,6 +13,7 @@ import userRouter from "./routes/userRouter.js";
 import expressFileupload from "express-fileupload";
 import { notifyUsers } from "./services/notifyUsers.js";
 import { removeUnverifiedAccounts } from "./services/removeUnverifiedAccounts.js";
+import ensureUploadsDirectory from "./ensureUploadsDir.js";
 
 export const app=express();
 config({path: "./config/config.env"});
@@ -32,6 +33,9 @@ app.use(expressFileupload({
     tempFileDir:"/tmp/"
 }))
 
+// Serve static files from uploads directory
+app.use("/uploads", express.static("uploads"));
+
 app.use("/api/v1/auth", authRouter);
 
 app.use("/api/v1/book", bookRouter);
@@ -42,6 +46,9 @@ app.use("/api/v1/borrow", borrowRouter);
 app.use("/api/v1/user", userRouter);
 
 // http://localhost:4000/api/v1/auth/register
+
+// Ensure uploads directory exists
+ensureUploadsDirectory();
 
 notifyUsers();
 removeUnverifiedAccounts();

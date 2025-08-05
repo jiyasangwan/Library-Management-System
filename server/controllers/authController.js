@@ -51,6 +51,7 @@ export const register = catchAsyncErrors(async (req, res, next) => {
       name,
       email,
       password: hashedPassword,
+      role: "User", // Explicitly set role to User for all new registrations
     });
 
     const verificationCode = user.generateVerificationCode(); // ✅ FIXED: called on instance
@@ -242,4 +243,100 @@ export const updatePassword = catchAsyncErrors(async(req,res,next)=>{
   });
 
 
+});
+
+// Create admin user (only accessible by existing admins)
+export const createAdmin = catchAsyncErrors(async(req,res,next)=>{
+  console.log("🔍 Admin creation attempt - User:", req.user?.email, "Role:", req.user?.role);
+  console.log("📝 Request body:", req.body);
+  console.log("📁 Files:", req.file);
+  
+  // Check if the current user is an admin
+  if(req.user.role !== "Admin"){
+    console.log("❌ Access denied - User is not an admin");
+    return next(new ErrorHandler("Only admins can create other admin users.", 403));
+  }
+
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    console.log("❌ Missing required fields:", { name: !!name, email: !!email, password: !!password });
+    return next(new ErrorHandler("Please enter all fields.", 400));
+  }
+
+  // Check if user already exists
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return next(new ErrorHandler("User with this email already exists", 400));
+  }
+
+  if (password.length < 6) {
+    return next(
+      new ErrorHandler(
+        "Password must be at least 6 characters.",
+        400
+      )
+    );
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Handle avatar upload
+  let avatarUrl = null;
+  if (req.file) {
+    // Store the file path for local storage
+    avatarUrl = `/uploads/avatars/${req.file.filename}`;
+  }
+  // Avatar is optional, so we proceed even if no avatar is provided
+
+  try {
+    console.log("🔧 Creating admin user with data:", {
+      name,
+      email,
+      hasPassword: !!hashedPassword,
+      role: "Admin",
+      accountVerified: true,
+      avatarUrl: avatarUrl || "No avatar (optional field)"
+    });
+
+    const adminUser = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: "Admin",
+      accountVerified: true, // Admin users are automatically verified
+      avatar: avatarUrl ? {
+        public_id: null,
+        url: avatarUrl
+      } : undefined
+    });
+
+    console.log("✅ Admin user created successfully:", adminUser._id);
+
+    res.status(201).json({
+      success: true,
+      message: "Admin user created successfully.",
+      user: {
+        id: adminUser._id,
+        name: adminUser.name,
+        email: adminUser.email,
+        role: adminUser.role,
+        avatar: adminUser.avatar
+      }
+    });
+  } catch (error) {
+    console.error("❌ Error creating admin:", error);
+    
+    // Handle specific MongoDB errors
+    if (error.code === 11000) {
+      return next(new ErrorHandler("User with this email already exists", 400));
+    }
+    
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message).join(', ');
+      return next(new ErrorHandler(`Validation error: ${validationErrors}`, 400));
+    }
+    
+    return next(new ErrorHandler("Failed to create admin user. Please try again.", 500));
+  }
 });

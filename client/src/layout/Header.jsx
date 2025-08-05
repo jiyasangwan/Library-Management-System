@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import settingIcon from "../assets/setting.png";
 import userIcon from "../assets/user.png";
 import { useDispatch, useSelector } from "react-redux";
+import { toggleSettingPopup } from "../store/slices/popUpSlice";
 
 const Header = () => {
   const dispatch=useDispatch();
@@ -53,7 +54,12 @@ const Header = () => {
 
       </div>
       <span className="bg-black h-14 w-[2px] "/>
-      <img src={settingIcon} alt="settingicon" className="w-8 h-8" onClick={()=>toggleSettingPopup()}/>
+      <img 
+        src={settingIcon} 
+        alt="settingicon" 
+        className="w-8 h-8 cursor-pointer hover:opacity-80 transition-opacity" 
+        onClick={()=>dispatch(toggleSettingPopup())}
+      />
 
     </div>
     </header>

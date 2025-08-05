@@ -90,21 +90,6 @@ const authSlice=createSlice({
             state.user=null;
             state.isAuthenticated=false;
         },
-        getUserRequest(state){
-            state.loading=true;
-            state.error=null;
-            state.message=null;
-        },
-        getUserSuccess(state,action){
-            state.loading=false;
-            state.user=action.payload.user;
-            state.isAuthenticated=true;
-        },
-        getUserFailed(state){
-            state.loading=false;
-            state.user=null;
-            state.isAuthenticated=false;
-        },
 
 
         forgotPasswordRequest(state){
